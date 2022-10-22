@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:whatsapp_clone/Global_ENV.dart';
 import 'package:whatsapp_clone/chat/data/models/user_model.dart';
 import 'package:whatsapp_clone/chat/domain/entities/user_entity.dart';
 import 'package:supabase/supabase.dart';

@@ -5,7 +5,6 @@ import 'package:whatsapp_clone/chat/data/models/message_model.dart';
 import 'package:whatsapp_clone/chat/domain/entities/message_entity.dart';
 import 'package:whatsapp_clone/chat/domain/entities/user_entity.dart';
 import 'package:supabase/supabase.dart';
-import '../../../../Global_ENV.dart';
 import '../../../../core/encryption/encryption.dart';
 import 'package:whatsapp_clone/core/superbase_service.dart';
 import 'dart:io';
