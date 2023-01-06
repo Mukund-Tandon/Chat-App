@@ -14,7 +14,7 @@ import 'package:whatsapp_clone/chat/domain/usecases/message/send_message_usecase
 
 import '../../../domain/entities/local_message_entity.dart';
 import '../../../domain/entities/receipt_entity.dart';
-import '../../../domain/usecases/chatfromphone/message_sent.dart';
+import '../../../domain/usecases/chatfromphone/save_message_locally.dart';
 import '../../../domain/usecases/chatfromphone/save_network_image.dart';
 import '../../../domain/usecases/chatfromphone/update_message_usecase.dart';
 import '../../../domain/usecases/message/upload_image_usecase.dart';
@@ -79,12 +79,20 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     });
     on<MessageImageSend>((event, emit) async {
       add(MessageImageinTempDirectoryEvent(event.message));
-      final status = await Permission.storage.request();
+      print('Image in Saving ');
       String imagePath = await saveImageUsecase.call(event.message);
-
-      add(MessageImageUploadingEvent(event.message));
-      String url = await uploadImageUsecase.call(event.message);
-      final message = MessageEntity(
+      var message = MessageEntity(
+          imageStatus: ImageStatus.uploading,
+          sender: event.message.sender,
+          receiver: event.message.receiver,
+          timestamp: event.message.timestamp,
+          contents: imagePath,
+          isImage: event.message.isImage);
+      add(MessageImageUploadingEvent(message));
+      print('Image Uploading');
+      String url =
+          await uploadImageUsecase.call(event.message); //uploading to supabase
+      message = MessageEntity(
           imageStatus: ImageStatus.downloading,
           sender: event.message.sender,
           receiver: event.message.receiver,
@@ -108,7 +116,7 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
           receiptStatus: ReceiptStatus.sent);
 
       await updateMessageWithId.call(localMessageEntity, event.message.id);
-
+      print('Image sent success');
       add(MessageImageSentSuccess(event.message));
     });
     on<MessageImageDownloadStartedEvent>((event, emit) async {

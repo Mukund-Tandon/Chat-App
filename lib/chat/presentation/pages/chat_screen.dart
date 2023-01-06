@@ -43,6 +43,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   List<LocalMessageEntity> messages = [];
   Timer? _startTypingTimer;
   Timer? _stopTypingTimer;
+  List<MessageEntity> temporary_messages = [];
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     super.didChangeAppLifecycleState(state);
@@ -141,7 +142,17 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                       }
                       WidgetsBinding.instance
                           .addPostFrameCallback((_) => _scrollToEnd());
-                      return _buildListOfMessages();
+                      return Column(
+                        children: [
+                          Expanded(
+                            child: Container(child: _buildListOfMessages()),
+                          ),
+                          Expanded(
+                              child: Container(
+                                  //TODO: add temp chat
+                                  ))
+                        ],
+                      );
                     }
                     // else if( state is Messa)
                     else {
@@ -307,8 +318,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         );
         context.read<ReceiptBloc>().add(ReceiptSent(receipt));
         if (chatId.isEmpty) chatId = state.message.sender;
-      }
-      if (state is MessageImageDownloadStarted) {
+      } else if (state is MessageImageDownloadStarted) {
         await messageThreadCubit.receivedMessage.call(state.message);
         final receipt = ReceiptEntity(
           recipient: state.message.sender,
@@ -318,18 +328,18 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         );
         context.read<ReceiptBloc>().add(ReceiptSent(receipt));
         if (chatId.isEmpty) chatId = state.message.sender;
-      }
-      if (state is MessageSentSuccess) {
-        await messageThreadCubit.messageSentUsecase.call(state.message);
+      } else if (state is MessageSentSuccess) {
+        await messageThreadCubit.saveMessageLocallyUsecase.call(state.message);
         dostuff();
         if (chatId.isEmpty) chatId = state.message.receiver;
-      }
-      if (state is MessageImageFromTempDirecctorySendState) {
-        await messageThreadCubit.messageSentUsecase.call(state.message);
+      } else if (state is MessageImageFromTempDirecctorySendState) {
+        await messageThreadCubit.saveMessageLocallyUsecase.call(state.message);
 
         if (chatId.isEmpty) chatId = state.message.receiver;
+      } else if (state is MessageImageUploadingState) {
+      } else if (state is MessageImageSentSuccessState) {
+        print('MessageImageSentSuccessState');
       }
-
       context.read<ChatsCubit>().getAllChats();
       await messageThreadCubit.getMessagesFromPhoneusingchatId(chatId);
     });

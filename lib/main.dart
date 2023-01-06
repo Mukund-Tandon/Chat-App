@@ -32,7 +32,7 @@ void main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-
+  await Permission.storage.request();
   runApp(MyApp());
 }
 

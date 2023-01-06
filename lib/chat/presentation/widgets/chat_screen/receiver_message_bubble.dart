@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/chat/domain/entities/local_message_entity.dart';
 import 'package:intl/intl.dart';
 import 'package:whatsapp_clone/chat/domain/entities/receipt_entity.dart';
+import 'package:whatsapp_clone/chat/presentation/widgets/chat_screen/reciever_image_message_widget.dart';
 import 'package:whatsapp_clone/chat/presentation/widgets/chat_screen/sender_image_message_widget.dart';
 import 'package:whatsapp_clone/chat/presentation/widgets/chat_screen/sender_text_message_widget.dart';
 
@@ -39,7 +40,7 @@ class ReceiverMessageBubble extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     localMessageEntity.message.isImage
-                        ? ImageMessageWidget(
+                        ? ReceiverImageMessageWidget(
                             imageStatus: localMessageEntity.message.imageStatus,
                             filePath: localMessageEntity.message.contents)
                         : TextMessageWidget(

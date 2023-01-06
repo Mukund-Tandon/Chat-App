@@ -34,7 +34,7 @@ class SenderMessageBubble extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     localMessageEntity.message.isImage
-                        ? ImageMessageWidget(
+                        ? SenderImageMessageWidget(
                             imageStatus: localMessageEntity.message.imageStatus,
                             filePath: localMessageEntity.message.contents)
                         : TextMessageWidget(

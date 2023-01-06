@@ -29,7 +29,7 @@ import 'package:whatsapp_clone/chat/domain/usecases/Image/upload_image_usecase.d
 import 'package:whatsapp_clone/chat/domain/usecases/chatCache/get_cached_chats.dart';
 import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/find_all_chats.dart';
 import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/get_message_usecase.dart';
-import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/message_sent.dart';
+import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/save_message_locally.dart';
 import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/received_message_usecase.dart';
 import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/save_image_usecase.dart';
 import 'package:whatsapp_clone/chat/domain/usecases/chatfromphone/save_network_image.dart';
@@ -91,7 +91,7 @@ Future<void> init() async {
   sl.registerFactory(() => MessageThreadCubit(
         getMessagesFromPhoneLocalWithChatId: sl(),
         receivedMessage: sl(),
-        messageSentUsecase: sl(),
+        saveMessageLocallyUsecase: sl(),
         updateMessageReceipt: sl(),
       ));
   //usecases
@@ -101,8 +101,8 @@ Future<void> init() async {
       () => ReceivedMessage(localChatRepository: sl()));
   sl.registerLazySingleton<GetMessagesFromPhoneLocalWithChatId>(
       () => GetMessagesFromPhoneLocalWithChatId(localChatRepository: sl()));
-  sl.registerLazySingleton<MessageSentUsecase>(
-      () => MessageSentUsecase(localChatRepository: sl()));
+  sl.registerLazySingleton<SaveMessageLocallyUsecase>(
+      () => SaveMessageLocallyUsecase(localChatRepository: sl()));
   sl.registerLazySingleton<UpdateMessageReceipt>(
       () => UpdateMessageReceipt(localChatRepository: sl()));
   sl.registerLazySingleton<GetCachedChats>(

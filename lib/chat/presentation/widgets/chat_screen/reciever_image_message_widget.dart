@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:whatsapp_clone/chat/domain/entities/message_entity.dart';
 import 'dart:io';
 
-class SenderImageMessageWidget extends StatelessWidget {
-  const SenderImageMessageWidget(
+class ReceiverImageMessageWidget extends StatelessWidget {
+  const ReceiverImageMessageWidget(
       {Key? key, required this.imageStatus, required this.filePath})
       : super(key: key);
   final String filePath;
@@ -11,12 +11,12 @@ class SenderImageMessageWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 200,
-      width: 140,
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Image.file(File(filePath)),
+          imageStatus != ImageStatus.done
+              ? Image.network(filePath)
+              : Image.file(File(filePath)),
           imageStatus != ImageStatus.done
               ? Center(
                   child: imageStatus == ImageStatus.saving
@@ -25,15 +25,10 @@ class SenderImageMessageWidget extends StatelessWidget {
                           width: 50,
                           child: CircularProgressIndicator(),
                         )
-                      : Container(
+                      : const SizedBox(
                           height: 50,
-                          width: 100,
-                          decoration:
-                              BoxDecoration(color: Colors.red.withOpacity(.4)),
-                          child: Text(
-                            'UpLoading',
-                            style: TextStyle(color: Colors.white, fontSize: 20),
-                          ),
+                          width: 90,
+                          child: Text('Loading'),
                         ),
                 )
               : Container(
