@@ -24,8 +24,9 @@ part 'message_state.dart';
 
 class MessageBloc extends Bloc<MessageEvent, MessageState> {
   GetAllMessages getAllMessages;
-  SendMessage sendMessage;
+  SaveMessageLocallyUsecase saveMessageLocallyUsecase;
   Dispose dispose;
+  SendMessage sendMessage;
   SaveImageUsecase saveImageUsecase;
   Stream<MessageEntity>? st;
   UploadImageUsecase uploadImageUsecase;
@@ -36,8 +37,9 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
     required this.updateMessageWithId,
     required this.saveNetworkImage,
     required this.saveImageUsecase,
-    required this.getAllMessages,
     required this.sendMessage,
+    required this.getAllMessages,
+    required this.saveMessageLocallyUsecase,
     required this.dispose,
     required this.updateMessageUsecase,
     required this.uploadImageUsecase,
@@ -49,11 +51,8 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       st = getAllMessages.call(userEntity: event.user);
       st?.listen((message) {
         print('new message from stream bloc ${message.contents}');
-        if (message.isImage) {
-          add(MessageImageReceivedEvent(message));
-        } else {
-          add(MessageReceived(message));
-        }
+
+        add(MessageReceived(message));
       }).onDone(() {
         print('stream closed');
       });
@@ -62,8 +61,9 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       emit(MessageReceivedSuccess(event.message));
     });
     on<MessageSent>((event, emit) async {
-      final message = await sendMessage.call(event.message);
-      emit(MessageSentSuccess(message));
+      String id = await saveMessageLocallyUsecase.call(event.message);
+      event.message.id = id;
+      emit(MessageSavedSuccess(event.message));
     });
     on<MessageImageSentSuccess>((event, emit) async {
       emit(MessageImageSentSuccessState(event.message));
@@ -78,7 +78,9 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
       emit(MessageImageUploadingState(event.message));
     });
     on<MessageImageSend>((event, emit) async {
+      String id = event.message.id;
       add(MessageImageinTempDirectoryEvent(event.message));
+
       print('Image in Saving ');
       String imagePath = await saveImageUsecase.call(event.message);
       var message = MessageEntity(
@@ -88,10 +90,19 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
           timestamp: event.message.timestamp,
           contents: imagePath,
           isImage: event.message.isImage);
+
+      message.id = id;
+      LocalMessageEntity localMessageEntity = LocalMessageEntity(
+          chatId: event.message.receiver,
+          message: message,
+          receiptStatus: ReceiptStatus.sent);
+      await updateMessageWithId.call(localMessageEntity, id);
       add(MessageImageUploadingEvent(message));
+
       print('Image Uploading');
       String url =
           await uploadImageUsecase.call(event.message); //uploading to supabase
+      print('Image Uploaded');
       message = MessageEntity(
           imageStatus: ImageStatus.downloading,
           sender: event.message.sender,
@@ -99,23 +110,24 @@ class MessageBloc extends Bloc<MessageEvent, MessageState> {
           timestamp: event.message.timestamp,
           contents: url,
           isImage: event.message.isImage);
-
-      final sentmessage = await sendMessage.call(message);
-
-      final updatemessage = MessageEntity(
+      print('Sending message to firebase');
+      message.id = id;
+      await sendMessage.call(message);
+      print('Sending message to firebase');
+      message = MessageEntity(
           imageStatus: ImageStatus.done,
-          sender: sentmessage.sender,
-          receiver: sentmessage.receiver,
-          timestamp: sentmessage.timestamp,
+          sender: event.message.sender,
+          receiver: event.message.receiver,
+          timestamp: event.message.timestamp,
           contents: imagePath,
-          isImage: sentmessage.isImage);
-      updatemessage.id = sentmessage.id;
-      LocalMessageEntity localMessageEntity = LocalMessageEntity(
+          isImage: event.message.isImage);
+      message.id = id;
+      localMessageEntity = LocalMessageEntity(
           chatId: event.message.receiver,
-          message: updatemessage,
+          message: message,
           receiptStatus: ReceiptStatus.sent);
-
-      await updateMessageWithId.call(localMessageEntity, event.message.id);
+      print('Updating message');
+      await updateMessageWithId.call(localMessageEntity, id);
       print('Image sent success');
       add(MessageImageSentSuccess(event.message));
     });

@@ -5,7 +5,7 @@ import '../../entities/message_entity.dart';
 class SaveMessageLocallyUsecase {
   final LocalChatRepository localChatRepository;
   SaveMessageLocallyUsecase({required this.localChatRepository});
-  Future<void> call(MessageEntity messageEntity) async {
+  Future<String> call(MessageEntity messageEntity) async {
     return localChatRepository.sendMessage(messageEntity);
   }
 }

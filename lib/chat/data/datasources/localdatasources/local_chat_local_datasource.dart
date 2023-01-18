@@ -6,6 +6,7 @@ import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/chat/data/models/chat_model.dart';
 import 'package:whatsapp_clone/chat/data/models/local_message_model.dart';
 import 'package:whatsapp_clone/chat/domain/entities/message_entity.dart';
@@ -17,7 +18,7 @@ import 'package:dio/dio.dart';
 
 abstract class LocalChatLocalDataSource {
   Future<void> addChat(ChatEntity chatEntity);
-  Future<void> addMessage(LocalMessageEntity localMessageEntity);
+  Future<String> addMessage(LocalMessageEntity localMessageEntity);
   Future<ChatModel> findChat(String chadId);
   Future<List<ChatModel>> findAllChats();
   Future<void> updateMessage(LocalMessageEntity localMessageEntity);
@@ -36,8 +37,9 @@ abstract class LocalChatLocalDataSource {
 class LocalChatLocalDataSourceImpl implements LocalChatLocalDataSource {
   final Database db;
   final SharedPreferences sharedPreferences;
+  final Uuid uuid;
   LocalChatLocalDataSourceImpl(
-      {required this.db, required this.sharedPreferences});
+      {required this.db, required this.sharedPreferences, required this.uuid});
   @override
   Future<void> addChat(ChatEntity chatEntity) async {
     var chat = ChatModel(chatEntity.id);
@@ -50,17 +52,25 @@ class LocalChatLocalDataSourceImpl implements LocalChatLocalDataSource {
   }
 
   @override
-  Future<void> addMessage(LocalMessageEntity localMessageEntity) async {
+  Future<String> addMessage(LocalMessageEntity localMessageEntity) async {
+    print(
+        'Adding message with contents ${localMessageEntity.message.contents}');
     var message = LocalMessageModel(
         chatId: localMessageEntity.chatId,
         message: localMessageEntity.message,
         receiptStatus: localMessageEntity.receiptStatus);
+
+    if (message.receiptStatus != ReceiptStatus.delivered) {
+      message.message.id = uuid.v1();
+    }
+    print('Mesage Id = ${message.message.id}');
     // await db.insert('messages', message.toJson(),
     //     conflictAlgorithm: ConflictAlgorithm.ignore);
     await db.transaction((txn) async {
       await txn.insert('messages', message.toJson(),
           conflictAlgorithm: ConflictAlgorithm.ignore);
     });
+    return message.message.id;
   }
 
   @override
@@ -176,6 +186,7 @@ class LocalChatLocalDataSourceImpl implements LocalChatLocalDataSource {
     //     conflictAlgorithm: ConflictAlgorithm.replace);
     // await _db.execute(
     //     ''' UPDATE messages SET receipt='${status.value()}' WHERE id='$messageId' ''');
+    print('Updating Status of message $messageId with ${status.value()}');
     var batch = db.batch();
     batch.update('messages', {'receipt': status.value()},
         where: 'id = ?',

@@ -9,11 +9,11 @@ import 'package:whatsapp_clone/chat/presentation/widgets/chat_screen/sender_text
 class ReceiverMessageBubble extends StatelessWidget {
   final LocalMessageEntity localMessageEntity;
   final String receiverUsername;
-  const ReceiverMessageBubble(
-      {Key? key,
-      required this.localMessageEntity,
-      required this.receiverUsername})
-      : super(key: key);
+  const ReceiverMessageBubble({
+    Key? key,
+    required this.localMessageEntity,
+    required this.receiverUsername,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +42,8 @@ class ReceiverMessageBubble extends StatelessWidget {
                     localMessageEntity.message.isImage
                         ? ReceiverImageMessageWidget(
                             imageStatus: localMessageEntity.message.imageStatus,
-                            filePath: localMessageEntity.message.contents)
+                            filePath: localMessageEntity.message.contents,
+                          )
                         : TextMessageWidget(
                             contents: localMessageEntity.message.contents,
                           ),

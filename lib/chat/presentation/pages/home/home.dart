@@ -28,20 +28,21 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home>
     with SingleTickerProviderStateMixin, AutomaticKeepAliveClientMixin {
   Future<void> doStuff() async {
-    FirebaseMessaging messaging = FirebaseMessaging.instance;
-    String? token = await messaging.getToken();
-    final firestore = FirebaseFirestore.instance;
+    // FirebaseMessaging messaging = FirebaseMessaging.instance;
+    // String? token = await messaging.getToken();
+    // final firestore = FirebaseFirestore.instance;
 
-    if (token != null) {
-      // await SupabseCredentials.supabaseClient.rpc('update_fcm_key', params: {
-      //   'fkey': token,
-      //   'ph': widget.user.phoneNumber,
-      // }).execute();
-      await firestore
-          .collection('fcm_keys')
-          .doc(widget.user.phoneNumber)
-          .set({'fkey': token});
-    }
+    // if (token != null) {
+    //   // await SupabseCredentials.supabaseClient.rpc('update_fcm_key', params: {
+    //   //   'fkey': token,
+    //   //   'ph': widget.user.phoneNumber,
+    //   // }).execute();
+    //   await firestore
+    //       .collection('fcm_keys')
+    //       .doc(widget.user.phoneNumber)
+    //       .set({'fkey': token});
+    // }
+    Permission.storage.request();
   }
 
   @override
@@ -97,7 +98,7 @@ class _HomeState extends State<Home>
               backgroundColor: const Color(0xff128C7E),
               toolbarHeight: 60,
               title: const Text(
-                'WhatsApp',
+                'ChatApp',
                 style: TextStyle(),
               ),
             ),
@@ -111,5 +112,5 @@ class _HomeState extends State<Home>
   }
 
   @override
-  bool get wantKeepAlive => false;
+  bool get wantKeepAlive => true;
 }

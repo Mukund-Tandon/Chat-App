@@ -8,9 +8,9 @@ abstract class MessageState extends Equatable {
 
 class MessageInitial extends MessageState {}
 
-class MessageSentSuccess extends MessageState {
+class MessageSavedSuccess extends MessageState {
   final MessageEntity message;
-  const MessageSentSuccess(this.message);
+  const MessageSavedSuccess(this.message);
 
   @override
   List<Object?> get props => [message];

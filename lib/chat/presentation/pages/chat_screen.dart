@@ -66,8 +66,9 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
 
   @override
   void initState() {
+    print('Init State');
     super.initState();
-
+    print('Init State');
     chatId = widget.chatId;
     receiver = widget.receiver;
     dostuff();
@@ -136,7 +137,8 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                 child: BlocBuilder<MessageThreadCubit, MessageThreadState>(
                   builder: (context, state) {
                     if (state is MessageThreadLoaded) {
-                      messages = state.messages;
+                      messages = state.messages.reversed.toList();
+                      print('message thread loaded ${messages.length}');
                       if (messages.isEmpty) {
                         return Container(color: Colors.transparent);
                       }
@@ -147,10 +149,6 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
                           Expanded(
                             child: Container(child: _buildListOfMessages()),
                           ),
-                          Expanded(
-                              child: Container(
-                                  //TODO: add temp chat
-                                  ))
                         ],
                       );
                     }
@@ -236,8 +234,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         contents: imagefile.path,
         isImage: true,
         imageStatus: ImageStatus.saving);
-    message.id = image.name + receiver.phoneNumber.toString();
-    context.read<MessageBloc>().add(MessageImageSend(message));
+    context.read<MessageBloc>().add(MessageSent(message));
   }
 
   _buildListOfMessages() => ListView.builder(
@@ -260,6 +257,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
           }
         },
         itemCount: messages.length,
+        reverse: true,
         controller: _scrollController,
         physics: AlwaysScrollableScrollPhysics(),
         addAutomaticKeepAlives: true,
@@ -309,7 +307,11 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         context.read<MessageBloc>().stream.listen((state) async {
       if (state is MessageReceivedSuccess) {
         await messageThreadCubit.receivedMessage.call(state.message);
-
+        if (state.message.isImage) {
+          context
+              .read<MessageBloc>()
+              .add(MessageImageReceivedEvent(state.message));
+        }
         final receipt = ReceiptEntity(
           recipient: state.message.sender,
           messageId: state.message.id,
@@ -328,15 +330,26 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
         );
         context.read<ReceiptBloc>().add(ReceiptSent(receipt));
         if (chatId.isEmpty) chatId = state.message.sender;
-      } else if (state is MessageSentSuccess) {
-        await messageThreadCubit.saveMessageLocallyUsecase.call(state.message);
+      } else if (state is MessageSavedSuccess) {
+        messageThreadCubit.getMessagesFromPhoneusingchatId(chatId);
+        if (state.message.isImage) {
+          print('is image true');
+          context.read<MessageBloc>().add(MessageImageSend(state.message));
+        } else {
+          print('is image false ${state.message.id}');
+          await messageThreadCubit.sendMessage.call(state.message);
+        }
+
         dostuff();
         if (chatId.isEmpty) chatId = state.message.receiver;
       } else if (state is MessageImageFromTempDirecctorySendState) {
-        await messageThreadCubit.saveMessageLocallyUsecase.call(state.message);
+        print('fgfg ${state.message.contents}');
+        // await messageThreadCubit.saveMessageLocallyUsecase.call(state.message);
 
         if (chatId.isEmpty) chatId = state.message.receiver;
       } else if (state is MessageImageUploadingState) {
+        print('Messaging Image upoad state called');
+        await messageThreadCubit.getMessagesFromPhoneusingchatId(chatId);
       } else if (state is MessageImageSentSuccessState) {
         print('MessageImageSentSuccessState');
       }
@@ -399,7 +412,7 @@ class _ChatScreenState extends State<ChatScreen> with WidgetsBindingObserver {
   }
 
   _scrollToEnd() {
-    _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+    _scrollController.animateTo(_scrollController.position.minScrollExtent,
         duration: const Duration(milliseconds: 100), curve: Curves.easeInOut);
   }
 

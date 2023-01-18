@@ -28,6 +28,7 @@ class ReceiptBloc extends Bloc<ReceiptEvent, ReceiptState> {
       // await streamSubscription?.cancel();
       streamSubscription =
           getAllReceipts.call(userEntity: event.user).listen((receipt) {
+        print('Receipt recieved Blc');
         add(ReceiptReceived(receipt));
       });
     });

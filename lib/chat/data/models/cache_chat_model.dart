@@ -7,14 +7,20 @@ class CacheChatModel extends CacheChats {
       {required UserEntity receiver,
       required DateTime timestamp,
       required int unread,
-      required String contents})
+      required String contents,
+      required bool isImage})
       : super(
             receiver: receiver,
             timestamp: timestamp,
             unread: unread,
-            contents: contents);
+            contents: contents,
+            isImage: isImage);
 
   factory CacheChatModel.fromJson(Map<String, dynamic> json) {
+    bool isImage = true;
+    if (json['isImage'] == 'false') {
+      isImage = false;
+    }
     UserModel receiver = UserModel(
         username: json['username'],
         photoUrl: json['photourl'],
@@ -23,6 +29,9 @@ class CacheChatModel extends CacheChats {
         receiver: receiver,
         contents: json['contents'],
         unread: json['unread'],
-        timestamp: DateTime.parse(json['timestamp']));
+        timestamp: DateTime.parse(
+          json['timestamp'],
+        ),
+        isImage: isImage);
   }
 }

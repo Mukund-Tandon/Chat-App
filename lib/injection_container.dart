@@ -4,6 +4,7 @@ import 'package:encrypt/encrypt.dart';
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
+import 'package:uuid/uuid.dart';
 import 'package:whatsapp_clone/chat/data/datasources/localdatasources/local_chat_local_datasource.dart';
 import 'package:whatsapp_clone/chat/data/datasources/localdatasources/logged_in_user_local_cache_datasource.dart';
 import 'package:whatsapp_clone/chat/data/datasources/remotedatasources/image_remote_data_source.dart';
@@ -78,7 +79,8 @@ Future<void> init() async {
       sendMessage: sl(),
       dispose: sl(),
       saveImageUsecase: sl(),
-      saveNetworkImage: sl()));
+      saveNetworkImage: sl(),
+      saveMessageLocallyUsecase: sl()));
   sl.registerFactory(() => ReceiptBloc(
       sendReceipt: sl(), disposeReceipt: sl(), getAllReceipts: sl()));
   sl.registerFactory(() => TypingBloc(
@@ -93,6 +95,7 @@ Future<void> init() async {
         receivedMessage: sl(),
         saveMessageLocallyUsecase: sl(),
         updateMessageReceipt: sl(),
+        sendMessage: sl(),
       ));
   //usecases
   sl.registerLazySingleton<FindAllChats>(
@@ -159,8 +162,9 @@ Future<void> init() async {
           loggedInUserLocalCacheDataSource: sl()));
 
   //datasources
-  sl.registerLazySingleton<LocalChatLocalDataSource>(
-      () => LocalChatLocalDataSourceImpl(db: sl(), sharedPreferences: sl()));
+  sl.registerLazySingleton<LocalChatLocalDataSource>(() =>
+      LocalChatLocalDataSourceImpl(
+          db: sl(), sharedPreferences: sl(), uuid: sl()));
   sl.registerLazySingleton<ImageRemoteDataSource>(
       () => ImageRemoteDataSourceImpl());
   sl.registerLazySingleton<MessageRemoteDataSource>(
@@ -186,4 +190,7 @@ Future<void> init() async {
 
   final sp = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sp);
+
+  final uuid = Uuid();
+  sl.registerLazySingleton(() => uuid);
 }

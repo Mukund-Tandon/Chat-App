@@ -10,7 +10,7 @@ import 'package:whatsapp_clone/core/superbase_service.dart';
 import 'dart:io';
 
 abstract class MessageRemoteDataSource {
-  Future<MessageModel> sendMessage(MessageEntity messageEntity);
+  Future<void> sendMessage(MessageEntity messageEntity);
   Stream<MessageModel> getAllMessages({required UserEntity userEntity});
   dispose();
   Future<String> uploadImage(MessageEntity messageEntity);
@@ -42,7 +42,7 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
   }
 
   @override
-  Future<MessageModel> sendMessage(MessageEntity messageEntity) async {
+  Future<void> sendMessage(MessageEntity messageEntity) async {
     var message = MessageModel(
         sender: messageEntity.sender,
         receiver: messageEntity.receiver,
@@ -58,10 +58,8 @@ class MessageRemoteDataSourceImpl implements MessageRemoteDataSource {
     // final result = await SupabseCredentials.supabaseClient
     //     .from('messages')
     //     .insert([data]).execute();
-    var newdocRef = firestore.collection('messages').doc();
+    var newdocRef = firestore.collection('messages').doc(messageEntity.id);
     await newdocRef.set(data);
-    message.id = newdocRef.id;
-    return message;
   }
 
   _startRecievingMessages(UserEntity userEntity) async {

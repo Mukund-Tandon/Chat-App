@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:whatsapp_clone/chat/domain/usecases/message/send_message_usecase.dart';
 
 import '../../../domain/entities/local_message_entity.dart';
 import '../../../domain/entities/message_entity.dart';
@@ -14,10 +15,12 @@ class MessageThreadCubit extends Cubit<MessageThreadState> {
   final GetMessagesFromPhoneLocalWithChatId getMessagesFromPhoneLocalWithChatId;
   final ReceivedMessage receivedMessage;
   final SaveMessageLocallyUsecase saveMessageLocallyUsecase;
+  final SendMessage sendMessage;
   final UpdateMessageReceipt updateMessageReceipt;
   MessageThreadCubit(
       {required this.getMessagesFromPhoneLocalWithChatId,
       required this.receivedMessage,
+      required this.sendMessage,
       required this.saveMessageLocallyUsecase,
       required this.updateMessageReceipt})
       : super(MessageThreadInitial());

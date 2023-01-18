@@ -59,7 +59,7 @@ class CachedChatTile extends StatelessWidget {
                         Container(
                           width: 250,
                           child: Text(
-                            chat.contents,
+                            chat.isImage ? 'image' : chat.contents,
                             overflow: TextOverflow.ellipsis,
                             maxLines: 1,
                             style: const TextStyle(

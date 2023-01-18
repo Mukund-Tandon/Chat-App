@@ -5,7 +5,7 @@ class SendMessage {
   final MessageRepository messageRepository;
   SendMessage(this.messageRepository);
 
-  Future<MessageEntity> call(MessageEntity messageEntity) {
+  Future<void> call(MessageEntity messageEntity) {
     return messageRepository.sendMessage(messageEntity);
   }
 }

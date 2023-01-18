@@ -35,6 +35,7 @@ class _ChatsState extends State<Chats> {
     ChatsCubit cb = context.read<ChatsCubit>();
     return BlocBuilder<ChatsCubit, ChatsState>(builder: (context, state) {
       if (state is ChatsLoaded) {
+        print('Chats Loaded state');
         // context.read<TypingBloc>().add(SubscribedTyping(
         //     widget.user, chats.map<String>((el) => el.from.id).toList()));
         if (state.chats.isEmpty) {
@@ -80,6 +81,7 @@ class _ChatsState extends State<Chats> {
                 child: ChatTile(chat: state.chats[indx])),
             itemCount: state.chats.length);
       } else if (state is CachedChatState) {
+        print('Chats Chahed state');
         if (state.chatList.isEmpty) {
           return const Center(
             child: CircularProgressIndicator(),
@@ -131,6 +133,7 @@ class _ChatsState extends State<Chats> {
               itemCount: state.chatList.length);
         }
       } else {
+        print('OH NO');
         return const Center(
           child: CircularProgressIndicator(),
         );
@@ -143,6 +146,11 @@ class _ChatsState extends State<Chats> {
     context.read<MessageBloc>().stream.listen((state) async {
       if (state is MessageReceivedSuccess) {
         await chatsCubit.messageReceived(state.message);
+        if (state.message.isImage) {
+          context
+              .read<MessageBloc>()
+              .add(MessageImageReceivedEvent(state.message));
+        }
         await chatsCubit.getAllChats();
       }
     });

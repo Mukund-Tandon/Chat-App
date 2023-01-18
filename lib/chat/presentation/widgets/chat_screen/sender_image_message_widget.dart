@@ -10,36 +10,74 @@ class SenderImageMessageWidget extends StatelessWidget {
   final ImageStatus imageStatus;
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      width: 140,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          Image.file(File(filePath)),
-          imageStatus != ImageStatus.done
-              ? Center(
-                  child: imageStatus == ImageStatus.saving
-                      ? const SizedBox(
-                          height: 50,
-                          width: 50,
-                          child: CircularProgressIndicator(),
-                        )
-                      : Container(
-                          height: 50,
-                          width: 100,
-                          decoration:
-                              BoxDecoration(color: Colors.red.withOpacity(.4)),
-                          child: Text(
-                            'UpLoading',
-                            style: TextStyle(color: Colors.white, fontSize: 20),
+    return GestureDetector(
+      onTap: () {
+        print('tab');
+        if (imageStatus == ImageStatus.done) {
+          showDialog(
+            context: context,
+            builder: (context) {
+              return Dialog(
+                child: InteractiveViewer(
+                  child: Container(
+                    child: Image.file(
+                      File(filePath),
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        }
+      },
+      child: Container(
+        height: 200,
+        width: 150,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            Image.file(File(filePath)),
+            imageStatus != ImageStatus.done
+                ? Center(
+                    child: imageStatus == ImageStatus.saving
+                        ? const SizedBox(
+                            height: 50,
+                            width: 50,
+                            child: CircularProgressIndicator(),
+                          )
+                        : Container(
+                            height: 35,
+                            width: 110,
+                            decoration: BoxDecoration(
+                                color: Colors.blueGrey.withOpacity(.4),
+                                borderRadius: BorderRadius.circular(12)),
+                            child: Row(
+                              children: [
+                                Container(
+                                  margin: EdgeInsets.only(left: 5),
+                                  child: Text(
+                                    'Uploading..',
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 14),
+                                  ),
+                                ),
+                                SizedBox(),
+                                Container(
+                                  height: 26,
+                                  width: 26,
+                                  child: CircularProgressIndicator(
+                                    color: Colors.white,
+                                  ),
+                                )
+                              ],
+                            ),
                           ),
-                        ),
-                )
-              : Container(
-                  color: Colors.transparent,
-                )
-        ],
+                  )
+                : Container(
+                    color: Colors.transparent,
+                  )
+          ],
+        ),
       ),
     );
   }

@@ -17,11 +17,11 @@ class LocalChatRepositoryImpl implements LocalChatRepository {
   LocalChatRepositoryImpl(
       this.localChatLocalDataSource, this.userRemoteDataSource);
   @override
-  Future<void> addMessage(LocalMessageEntity localMessageEntity) async {
+  Future<String> addMessage(LocalMessageEntity localMessageEntity) async {
     if (!await localChatLocalDataSource.chatExist(localMessageEntity.chatId)) {
       await _createNewChat(localMessageEntity.chatId);
     } else {}
-    await localChatLocalDataSource.addMessage(localMessageEntity);
+    return await localChatLocalDataSource.addMessage(localMessageEntity);
   }
 
   @override
@@ -40,12 +40,12 @@ class LocalChatRepositoryImpl implements LocalChatRepository {
   }
 
   @override
-  Future<void> sendMessage(MessageEntity messageEntity) async {
+  Future<String> sendMessage(MessageEntity messageEntity) async {
     LocalMessageEntity localMessageEntity = LocalMessageEntity(
         chatId: messageEntity.receiver,
         message: messageEntity,
         receiptStatus: ReceiptStatus.sent);
-    await addMessage(localMessageEntity);
+    return await addMessage(localMessageEntity);
   }
 
   @override
@@ -83,7 +83,8 @@ class LocalChatRepositoryImpl implements LocalChatRepository {
           'unread': chats[i].unread,
           'username': chats[i].from.username,
           'photourl': chats[i].from.photoUrl,
-          'timestamp': chats[i].mostRecent.message.timestamp.toString()
+          'timestamp': chats[i].mostRecent.message.timestamp.toString(),
+          'isImage': chats[i].mostRecent.message.isImage.toString()
         });
       }
     }

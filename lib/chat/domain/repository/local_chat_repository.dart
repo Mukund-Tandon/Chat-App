@@ -9,7 +9,7 @@ abstract class LocalChatRepository {
   Future<void> addMessage(LocalMessageEntity localMessageEntity);
   Future<void> receivedMessage(MessageEntity messageEntity);
   Future<List<LocalMessageEntity>> getMessages(String ChatId);
-  Future<void> sendMessage(MessageEntity messageEntity);
+  Future<String> sendMessage(MessageEntity messageEntity);
   Future<ChatEntity> findChat(String chadId);
   Future<List<ChatEntity>> findAllChats();
   Future<void> updateMessage(LocalMessageEntity localMessageEntity);
